@@ -1,14 +1,35 @@
-import React, { useRef,useEffect, useState } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import StudentCard from "./StudentCard";
+const courseSubjects = {
+  "Full Stack Development": [
+    "HTML",
+    "CSS",
+    "JavaScript",
+    "React",
+    "Node.js",
+    "MongoDB"
+  ],
+
+  "Web Development": [
+    "HTML",
+    "CSS",
+    "JavaScript"
+  ],
+
+  "C++ Programming": [
+    "C++",
+    "OOP",
+    "Data Structure",
+    "Algorithms"
+  ]
+};
+
 function Stdlist() {
   const [Slipno, setSlipno] = useState(() => {
     const savedSlipno = localStorage.getItem("Slipno");
-    
     return savedSlipno ? Number(savedSlipno) : 1;
   });
-  
-  //   const [Slipno, setSlipno] = useState(1) 
-  
+
   const [name, setName] = useState("");
   const [Lastname, setLastname] = useState("");
   const [Contactnumber, setcontactnumber] = useState("");
@@ -17,6 +38,7 @@ function Stdlist() {
   const [Age, setAge] = useState("");
   const [Fees, setFees] = useState("");
   const [payFees, setPayFees] = useState("");
+
   const [subjects, setSubjects] = useState([]);
   const [open, setOpen] = useState(false);
 
@@ -29,130 +51,22 @@ function Stdlist() {
   const feesRef = useRef();
   const payFeesRef = useRef();
 
-
   const [students, setStudents] = useState(() => {
-  const savedStudents = localStorage.getItem("students");
-
-  return savedStudents ? JSON.parse(savedStudents) : [];
+    const savedStudents = localStorage.getItem("students");
+    return savedStudents ? JSON.parse(savedStudents) : [];
   });
-  useEffect(() => {
-  localStorage.setItem("students", JSON.stringify(students));
-   localStorage.setItem("Slipno", Slipno);
-}, [students, Slipno]);
 
+  useEffect(() => {
+    localStorage.setItem("students", JSON.stringify(students));
+    localStorage.setItem("Slipno", Slipno);
+  }, [students, Slipno]);
 
   function ShowDate() {
     const date = new Date();
     return date.toLocaleDateString();
   }
- const [errors, setErrors] = useState({
-  name: "",
-  lastname: "",
-  contact: "",
-  address: "",
-  course: "",
-  age: "",
-  fees: "",
-  payFees: ""
-});
 
-function handleEnter(e, value, field, nextInput) {
-  if (e.key === "Enter") {
-    e.preventDefault();
-
-    if (value.trim() === "") {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: `Enter the ${field}`
-      }));
-
-      return;
-    }
-
-    // Error remove
-    setErrors((prev) => ({
-      ...prev,
-      [field]: ""
-    }));
-
-    nextInput.current.focus();
-  }
-}
-  function addStudent() {
-  const newErrors = {};
-
-  if (name.trim() === "") {
-    newErrors.name = "Enter the name";
-  }
-
-  if (Lastname.trim() === "") {
-    newErrors.lastname = "Enter the last name";
-  }
-
-  if (Contactnumber.trim() === "") {
-    newErrors.contact = "Enter the contact number";
-  }
-
-  if (Address.trim() === "") {
-    newErrors.address = "Enter the address";
-  }
-
-  if (Course.trim() === "") {
-    newErrors.course = "Enter the course";
-  }
-
-  if (Age.trim() === "") {
-    newErrors.age = "Enter the age";
-  }
-
-  if (Fees.trim() === "") {
-    newErrors.fees = "Enter the fees";
-  }
-
-  if (payFees.trim() === "") {
-    newErrors.payFees = "Enter the payable fees";
-  }
-
-  // Errors hain to student add mat karo
-  if (Object.keys(newErrors).length > 0) {
-    setErrors(newErrors);
-    return;
-  }
-
-  // Sab fields filled hain → student add hoga
-  const studentDate = new Date().toLocaleDateString();
-
-  const remainingFees = Number(Fees) - Number(payFees);
-
-  const newStudent = {
-    slipNo: Slipno,
-    date: studentDate,
-    name: name,
-    lastname: Lastname,
-    contact: Contactnumber,
-    address: Address,
-    course: Course,
-    age: Age,
-    fees: Fees,
-    payFees: payFees,
-    remainingFees: remainingFees,
-      subjects: subjects
-  };
-
-  setStudents([...students, newStudent]);
-
-  setSlipno(Slipno + 1);
-
-  setName("");
-  setLastname("");
-  setcontactnumber("");
-  setAddress("");
-  setcourse("");
-  setAge("");
-  setFees("");
-  setPayFees("");
-
-  setErrors({
+  const [errors, setErrors] = useState({
     name: "",
     lastname: "",
     contact: "",
@@ -163,76 +77,322 @@ function handleEnter(e, value, field, nextInput) {
     payFees: ""
   });
 
-  nameRef.current.focus();
-}
 
 
-const subjectList = [
-  "HTML",
-  "CSS",
-  "JavaScript",
-  "React",
-  "C++"
-];
+  function handleEnter(e, value, field, nextInput) {
+    if (e.key === "Enter") {
+      e.preventDefault();
 
-function handleSubject(subject) {
+      if (value.trim() === "") {
+        setErrors((prev) => ({
+          ...prev,
+          [field]: `Enter the ${field}`
+        }));
+        return;
+      }
 
-  if (subjects.includes(subject)) {
+      setErrors((prev) => ({
+        ...prev,
+        [field]: ""
+      }));
 
-    setSubjects(
-      subjects.filter((item) => item !== subject)
-    );
+      nextInput.current.focus();
+    }
+  }
 
-  } else {
 
-    setSubjects([
-      ...subjects,
-      subject
-    ]);
+  function handleName(e) {
+    const namevalue = e.target.value;
+
+    // Only letters and spaces
+    if (!/^[A-Za-z ]*$/.test(namevalue)) {
+      setErrors((prev) => ({
+        ...prev,
+        name: "Only letters are allowed"
+      }));
+      return;
+    }
+
+    setName(namevalue);
+
+    setErrors((prev) => ({
+      ...prev,
+      name: ""
+    }));
+  }
+
+
+
+  function handleLastname(e) {
+    const Lastnamevalue = e.target.value;
+
+    // Only letters and spaces
+    if (!/^[A-Za-z ]*$/.test(Lastnamevalue)) {
+      setErrors((prev) => ({
+        ...prev,
+        lastname: "Only letters are allowed"
+      }));
+      return;
+    }
+
+    setLastname(Lastnamevalue);
+
+    setErrors((prev) => ({
+      ...prev,
+      lastname: ""
+    }));
+  }
+
+
+  function handleAddress(e) {
+    const addressvalue = e.target.value;
+
+    // Letters + numbers + / ( ) . , and spaces
+    if (!/^[A-Za-z0-9\/()., ]*$/.test(addressvalue)) {
+      setErrors((prev) => ({
+        ...prev,
+        address: "Special characters are not allowed"
+      }));
+      return;
+    }
+
+    setAddress(addressvalue);
+
+    setErrors((prev) => ({
+      ...prev,
+      address: ""
+    }));
+  }
+
+
+
+  function handlecontactnumber(e) {
+    const cnumber = e.target.value;
+
+    // Only numbers
+    if (!/^\d*$/.test(cnumber)) {
+      setErrors((prev) => ({
+        ...prev,
+        contact: "Only numbers are allowed"
+      }));
+      return;
+    }
+
+    // Maximum 10 digits
+    if (cnumber.length > 10) {
+      setErrors((prev) => ({
+        ...prev,
+        contact: "Contact number must be 10 digits"
+      }));
+      return;
+    }
+
+    setcontactnumber(cnumber);
+
+    setErrors((prev) => ({
+      ...prev,
+      contact: ""
+    }));
+  }
+
+  function handlefees(e){
+    const feesvalue = e.target.value;
+
+   if (!/^\d*\.?\d*$/.test(feesvalue)) {
+      setErrors((prev) => ({
+        ...prev,
+        Fees: "Only numbers are allowed"
+      }));
+      return;
+    }
+     setFees(feesvalue);
+
+    setErrors((prev) => ({
+      ...prev,
+     Fees: ""
+    }));
+  }
+ 
+  function handlepayfees(e){
+    const payablefees = e.target.value;
+
+   if (!/^\d*\.?\d*$/.test(payablefees)) {
+      setErrors((prev) => ({
+        ...prev,
+        Fees: "Only numbers are allowed"
+      }));
+      return;
+    }
+     setPayFees(payablefees);
+
+    setErrors((prev) => ({
+      ...prev,
+     Fees: ""
+    }));
+  }
+ 
+
+  function addStudent() {
+    const newErrors = {};
+
+    if (name.trim() === "") {
+      newErrors.name = "Enter the name";
+    }
+
+    if (Lastname.trim() === "") {
+      newErrors.lastname = "Enter the last name";
+    }
+
+    if (Contactnumber.trim() === "") {
+      newErrors.contact = "Enter the contact number";
+    } else if (Contactnumber.length !== 10) {
+      newErrors.contact = "Contact number must be 10 digits";
+    }
+
+    if (Address.trim() === "") {
+      newErrors.address = "Enter the address";
+    }
+
+    if (Course.trim() === "") {
+      newErrors.course = "Enter the course";
+    }
+
+    if (Age.trim() === "") {
+      newErrors.age = "Enter the age";
+    }
+
+    if (Fees.trim() === "") {
+      newErrors.fees = "Enter the fees";
+    }
+
+    if (payFees.trim() === "") {
+      newErrors.payFees = "Enter the payable fees";
+    }
+
+    // If errors exist, don't add student
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+ 
+
+    const studentDate = new Date().toLocaleDateString();
+
+    const remainingFees =
+      Number(Fees) - Number(payFees);
+
+    const newStudent = {
+      slipNo: Slipno,
+      date: studentDate,
+      name: name,
+      lastname: Lastname,
+      contact: Contactnumber,
+      address: Address,
+      course: Course,
+      age: Age,
+      fees: Fees,
+      payFees: payFees,
+      remainingFees: remainingFees,
+      subjects: courseSubjects[Course] || []
+    };
+
+    setStudents((prev) => [...prev, newStudent]);
+
+    setSlipno((prev) => prev + 1);
+
+    // Clear inputs
+    setName("");
+    setLastname("");
+    setcontactnumber("");
+    setAddress("");
+    setcourse("");
+    setAge("");
+    setFees("");
+    setPayFees("");
+
+    // Clear subjects
+   
+
+    // Clear errors
+    setErrors({
+      name: "",
+      lastname: "",
+      contact: "",
+      address: "",
+      course: "",
+      age: "",
+      fees: "",
+      payFees: ""
+    });
+
+    // Focus first input
+    nameRef.current.focus();
+  }
+
+ 
+
+
+function  handlefunction(e){
+  const coursename = e.target.value;
+
+  if(coursename === "Full Stack Development"){
+return courseSubjects["Full Stack Development"]
 
   }
+
+  if(coursename === "Web Development"){
+return courseSubjects["Web Development"]
+
+  }
+
+  if(coursename ===  "C++ Programming"){
+return courseSubjects[ "C++ Programming"]
+
+  }
+
 }
 
 
-function deleteStudent(index) {
-  const updatedStudents = students.filter((student, i) => {
-    return i !== index;
-  });
+  // function handleSubject(subject) {
+  //   if (subjects.includes(subject)) {
+  //     setSubjects(
+  //       subjects.filter((item) => item !== subject)
+  //     );
+  //   } else {
+  //     setSubjects([
+  //       ...subjects,
+  //       subject
+  //     ]);
+  //   }
+  // }
 
-  setStudents(updatedStudents);
-}
 
 
+  function deleteStudent(index) {
+    const updatedStudents = students.filter(
+      (student, i) => i !== index
+    );
 
-
-
-
+    setStudents(updatedStudents);
+  }
 
   return (
     <>
-    <StudentCard students = {students}/>
+      <StudentCard students={students} />
 
       <div className="slip">
-
-        <div className="logo">
-          
-         
-        </div>
+        <div className="logo"></div>
 
         <div className="title">
           <h1>Student Slip</h1>
           <h2>Eassy Skill Academy</h2>
         </div>
 
-        <div className="image">
-         
-          
-        </div>
-
+        <div className="image"></div>
       </div>
 
-      <div className="addmission  ">
-
+      <div className="addmission">
         <div className="date">
           <h4>Date: {ShowDate()}</h4>
         </div>
@@ -242,266 +402,275 @@ function deleteStudent(index) {
         </div>
 
         <div className="slipno">
-          <h4>Slip No: ADN{String(Slipno).padStart(3, "0")}</h4>
+          <h4>
+            Slip No: ADN
+            {String(Slipno).padStart(3, "0")}
+          </h4>
         </div>
-
       </div>
 
       <div className="detailes input-group input-group-sm mb-3">
 
+     
         <div className="studentdetailes">
 
-     <h4>
-  First Name :
-  <input
-    ref={nameRef}
-    value={name}
-    onChange={(e) => {
-      setName(e.target.value);
-      setErrors((prev) => ({ ...prev, name: "" }));
-    }}
-    onKeyDown={(e) =>
-      handleEnter(e, name, "name", lastNameRef)
-    }
-  />
+          <h4>
+            First Name :
 
-  {errors.name && (
-    <div className="error">
-      {errors.name}
-    </div>
-  )}
-</h4>
+            <input
+              ref={nameRef}
+              value={name}
+              onChange={handleName}
+              onKeyDown={(e) =>
+                handleEnter(
+                  e,
+                  name,
+                  "name",
+                  lastNameRef
+                )
+              }
+            />
 
-         <h4>
-  Last Name :
-  <input
-    ref={lastNameRef}
-    value={Lastname}
-    onChange={(e) => {
-      setLastname(e.target.value);
-      setErrors((prev) => ({ ...prev, lastname: "" }));
-    }}
-    onKeyDown={(e) =>
-      handleEnter(e, Lastname, "last name", contactRef)
-    }
-  />
-
-  {errors.lastname && (
-    <div className="error">
-      {errors.lastname}
-    </div>
-  )}
-</h4>
-
-        <h4>
-  Contact Number :
-  <input
-    ref={contactRef}
-    value={Contactnumber}
-    onChange={(e) => {
-      setcontactnumber(e.target.value);
-      setErrors((prev) => ({ ...prev, contact: "" }));
-    }}
-    onKeyDown={(e) =>
-      handleEnter(e, Contactnumber, "contact number", addressRef)
-    }
-  />
-
-  {errors.contact && (
-    <div className="error">
-      {errors.contact}
-    </div>
-  )}
-</h4>
-
-         <h4>
-  Address :
-  <input
-    ref={addressRef}
-    value={Address}
-    onChange={(e) => {
-      setAddress(e.target.value);
-      setErrors((prev) => ({ ...prev, address: "" }));
-    }}
-    onKeyDown={(e) =>
-      handleEnter(e, Address, "address", courseRef)
-    }
-  />
-
-  {errors.address && (
-    <div className="error">
-      {errors.address}
-    </div>
-  )}
-</h4>
-            </div>
-<div className="secound">
+            {errors.name && (
+              <div className="error">
+                {errors.name}
+              </div>
+            )}
+          </h4>
 
           <h4>
-  Course :
-  <input
-    ref={courseRef}
-    value={Course}
-    onChange={(e) => {
-      setcourse(e.target.value);
-      setErrors((prev) => ({ ...prev, course: "" }));
-    }}
-    onKeyDown={(e) =>
-      handleEnter(e, Course, "course", ageRef)
-    }
-  />
+            Last Name :
 
-  {errors.course && (
-    <div className="error">
-      {errors.course}
-    </div>
-  )}
-</h4>
-     <h4>
-  Age :
-  <input
-    ref={ageRef}
-    value={Age}
-    onChange={(e) => {
-      setAge(e.target.value);
-      setErrors((prev) => ({ ...prev, age: "" }));
-    }}
-    onKeyDown={(e) =>
-      handleEnter(e, Age, "age", feesRef)
-    }
-  />
+            <input
+              ref={lastNameRef}
+              value={Lastname}
+              onChange={handleLastname}
+              onKeyDown={(e) =>
+                handleEnter(
+                  e,
+                  Lastname,
+                  "lastname",
+                  contactRef
+                )
+              }
+            />
 
-  {errors.age && (
-    <div className="error">
-      {errors.age}
-    </div>
-  )}
-</h4>
+            {errors.lastname && (
+              <div className="error">
+                {errors.lastname}
+              </div>
+            )}
+          </h4>
 
           <h4>
-  Fees :
-  <input
-    ref={feesRef}
-    value={Fees}
-    onChange={(e) => {
-      setFees(e.target.value);
-      setErrors((prev) => ({ ...prev, fees: "" }));
-    }}
-    onKeyDown={(e) =>
-      handleEnter(e, Fees, "fees", payFeesRef)
-    }
-  />
+            Contact Number :
 
-  {errors.fees && (
-    <div className="error">
-      {errors.fees}
-    </div>
-  )}
-</h4>
+            <input
+              ref={contactRef}
+              value={Contactnumber}
+              onChange={handlecontactnumber}
+              onKeyDown={(e) =>
+                handleEnter(
+                  e,
+                  Contactnumber,
+                  "contact",
+                  addressRef
+                )
+              }
+            />
 
-        <h4>
-  Payable Fees :
-  <input
-    ref={payFeesRef}
-    value={payFees}
-    onChange={(e) => {
-      setPayFees(e.target.value);
-      setErrors((prev) => ({ ...prev, payFees: "" }));
-    }}
-    onKeyDown={(e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
+            {errors.contact && (
+              <div className="error">
+                {errors.contact}
+              </div>
+            )}
+          </h4>
 
-        if (payFees.trim() === "") {
-          setErrors((prev) => ({
-            ...prev,
-            payFees: "Enter the payable fees"
-          }));
+          <h4>
+            Address :
 
-          return;
-        }
+            <input
+              ref={addressRef}
+              value={Address}
+              onChange={handleAddress}
+              onKeyDown={(e) =>
+                handleEnter(
+                  e,
+                  Address,
+                  "address",
+                  courseRef
+                )
+              }
+            />
 
-        setErrors((prev) => ({
-          ...prev,
-          payFees: ""
-        }));
+            {errors.address && (
+              <div className="error">
+                {errors.address}
+              </div>
+            )}
+          </h4>
 
-        addStudent();
-      }
-    }}
-  />
+        </div>
 
-  {errors.payFees && (
-    <div className="error">
-      {errors.payFees}
-    </div>
-  )}
+     
 
+        <div className="secound">
 
-  <div className="subjectSelect">
+          <h4>
+            Course :
 
-      {/* Button */}
-      <button className="btn btn-primary"
-        type="button"
-        onClick={() => setOpen(!open)}
-      >
-        Select Subject
-      </button>
+           <select
+  ref={courseRef}
+  value={Course}
+  onChange={(e) => {
+    const selectedCourse = e.target.value;
 
-      {/* Box */}
-      {open && (
-        <div className="subjectBox">
+    setcourse(selectedCourse);
 
-          {subjectList.map((subject) => (
+    setErrors((prev) => ({
+      ...prev,
+      course: ""
+    }));
+  }}
+>
+  <option value="">Select Course</option>
 
-            <label key={subject}>
+  <option value="Full Stack Development">
+    Full Stack Development
+  </option>
 
-              <input
-                type="checkbox"
-                checked={subjects.includes(subject)}
-                onChange={() => handleSubject(subject)}
-              />
+  <option value="Web Development">
+    Web Development
+  </option>
 
-              {subject}
+  <option value="C++ Programming">
+    C++ Programming
+  </option>
+</select>
 
-            </label>
+            {errors.course && (
+              <div className="error">
+                {errors.course}
+              </div>
+            )}
+          </h4>
 
-          ))}
+          <h4>
+            Age :
 
-          <button className="btn btn-danger"
-            type="button"
-            onClick={() => setOpen(false)}
+            <input
+              ref={ageRef}
+              value={Age}
+              onChange={(e) => {
+                setAge(e.target.value);
+
+                setErrors((prev) => ({
+                  ...prev,
+                  age: ""
+                }));
+              }}
+              onKeyDown={(e) =>
+                handleEnter(
+                  e,
+                  Age,
+                  "age",
+                  feesRef
+                )
+              }
+            />
+
+            {errors.age && (
+              <div className="error">
+                {errors.age}
+              </div>
+            )}
+          </h4>
+
+          <h4>
+            Fees :
+
+            <input
+              ref={feesRef}
+              value={Fees}
+              onChange={handlefees}
+              onKeyDown={(e) =>
+                handleEnter(
+                  e,
+                  Fees,
+                  "fees",
+                  payFeesRef
+                )
+              }
+            />
+
+            {errors.fees && (
+              <div className="error">
+                {errors.fees}
+              </div>
+            )}
+          </h4>
+
+          <h4>
+            Payable Fees :
+
+            <input
+              ref={payFeesRef}
+              value={payFees}
+              onChange={handlepayfees}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+
+                  if (payFees.trim() === "") {
+                    setErrors((prev) => ({
+                      ...prev,
+                      payFees:
+                        "Enter the payable fees"
+                    }));
+                    return;
+                  }
+
+                  addStudent();
+                }
+              }}
+            />
+
+            {errors.payFees && (
+              <div className="error">
+                {errors.payFees}
+              </div>
+            )}
+
+         
+
+       
+
+             
+
+          </h4>
+
+        </div>
+
+   
+
+        <div className="submit">
+
+          <button
+            className="btn btn-success"
+            onClick={addStudent}
           >
-            Done
+            Add Student
           </button>
 
         </div>
-      )}
-
-      {/* Selected subjects */}
-      <p>
-        Selected: {subjects.join(", ")}
-      </p>
-
-    </div>
-
-
-
-</h4>
-
-                </div>
-                <div className="submit">
-
-          <button className="btn btn-success" onClick={addStudent}>
-            Add Student
-          </button>
-                </div>
-
 
       </div>
+
+
       <div className="list">
 
-        <table  className="table" >
+        <table className="table">
+
           <thead>
             <tr>
               <th>Sr.NO</th>
@@ -509,48 +678,71 @@ function deleteStudent(index) {
               <th>Date</th>
               <th>Student name</th>
               <th>Contact</th>
-              <th>address</th>
+              <th>Address</th>
               <th>Course</th>
               <th>Age</th>
               <th>Fees</th>
-              <th>payfees</th>
-              <th>Rimeaing</th>
+              <th>Pay Fees</th>
+              <th>Remaining</th>
               <th>Action</th>
             </tr>
           </thead>
 
           <tbody>
+
             {students.map((student, index) => (
+
               <tr key={index}>
+
                 <td>{index + 1}</td>
-              <td>
-  ADN{String(student.slipNo).padStart(3, "0")}
-</td>  
-        <td>{student.date}</td>
-                <td>{student.name} {student.lastname}</td>
-                <td>{student.contact}</td>
-                <td>{student.address}</td>
-                <td>{student.course}</td>
-                <td>{student.age}</td>
-                <td>{student.fees}</td>
-                <td>{student.payFees}</td>
-                <td>{student.remainingFees}</td>
+
                 <td>
-                  
-                      <button
-          className="btn btn-danger btn-sm"
-          onClick={() => deleteStudent(index)}
-        >
-          Delete
-        </button>
+                  ADN
+                  {String(student.slipNo).padStart(3, "0")}
                 </td>
+
+                <td>{student.date}</td>
+
+                <td>
+                  {student.name} {student.lastname}
+                </td>
+
+                <td>{student.contact}</td>
+
+                <td>{student.address}</td>
+
+                <td>{student.course}</td>
+
+                <td>{student.age}</td>
+
+                <td>{student.fees}</td>
+
+                <td>{student.payFees}</td>
+
+                <td>{student.remainingFees}</td>
+
+                <td>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() =>
+                      deleteStudent(index)
+                    }
+                  >
+                    Delete
+                  </button>
+                </td>
+
               </tr>
+
             ))}
+
           </tbody>
 
         </table>
 
       </div>
+
+      {/* <StudentResult data ={students}/> */}
     </>
   );
 }
